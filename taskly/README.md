@@ -1,4 +1,4 @@
-# go_moon
+# taskly
 
 A new Flutter project.
 

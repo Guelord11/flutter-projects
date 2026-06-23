@@ -1,4 +1,4 @@
-package com.example.go_moon
+package com.example.taskly
 
 import io.flutter.embedding.android.FlutterActivity
 

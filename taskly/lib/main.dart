@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 
-import 'package:go_moon/pages/home_page.dart';
+import 'pages/home_page.dart';
 
 void main() {
-  runApp(const App());
+  runApp(const MyApp());
 }
 
-class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "GoMoon",
-      theme: ThemeData(scaffoldBackgroundColor: Color.fromRGBO(31,31,31, 1.0)),
+      title: 'Taskly',
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+      ),
       home: HomePage(),
     );
   }
 }
+

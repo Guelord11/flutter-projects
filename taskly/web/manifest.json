@@ -1,6 +1,6 @@
 {
-    "name": "go_moon",
-    "short_name": "go_moon",
+    "name": "taskly",
+    "short_name": "taskly",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
