@@ -1,131 +1,108 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:go_moon/widgets/custom_dropdown_button.dart';
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
-class HomePage extends StatelessWidget{
+  @override
+  State<StatefulWidget> createState() {
+    return _HomePageState();
+  }
+}
+
+class _HomePageState extends State<HomePage> {
   late double _deviceHeight, _deviceWidth;
+  String? _newTaskContent;
 
-  HomePage({Key? key}) : super(key: key);
+  _HomePageState();
 
   @override
   Widget build(BuildContext context) {
     _deviceHeight = MediaQuery.of(context).size.height;
     _deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: SafeArea(
-          child: Container(
-            height: _deviceHeight,
-            width: _deviceWidth,
-            padding: EdgeInsets.symmetric(horizontal: _deviceWidth * 0.05),
-            child: Stack(
-              children: [
-                Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _pageTitle(),
-                  _bookRideWidget(),
-                ],
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: _astroImageWidget(),
-            ),
-          ],
-          ),  
-        ),
-      ),
-    );
-  }
-
-  Widget _pageTitle() {
-    return const Text(
-      "#GoMoon", 
-      style: TextStyle(
-        color: Colors.white, 
-        fontSize: 70,
-        fontWeight: FontWeight.w800,
-      ),
-    );
-  }
-
-  Widget _astroImageWidget() {
-    return Container(
-      height: _deviceHeight * 0.5,
-      width: _deviceWidth * 0.65,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: AssetImage("assets/images/moon.png"),
-        ),
-      ),
-    );
-  }
-
-  Widget _bookRideWidget() {
-    return Container(
-      height: _deviceHeight * 0.25,
-      width: _deviceWidth,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _destinationDropDownWidget(),
-          _travellersInformationWidget(),
-          _rideButton(),
-        ]
-      ),
-    );
-  }
-
-  Widget _destinationDropDownWidget() {
-    return CustomDropdownButtonClass(
-      values: const [
-        "James Webb Station", "Guelors Station",
-        ],
-      width: _deviceWidth,
-    );
-  }
-
-  Widget _travellersInformationWidget() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-      CustomDropdownButtonClass(
-        values: const ["1", "2", "3", "4"],
-        width: _deviceWidth * 0.45,
-      ),
-      CustomDropdownButtonClass(
-        values: const ["Economy", "Business", "First", "Private"],
-        width: _deviceWidth * 0.40,
-      ),
-    ],
-    );
-  }
-
-  Widget _rideButton(){
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      width: _deviceWidth,
-      margin: EdgeInsets.only(bottom: _deviceHeight * 0.01),
-      child: MaterialButton(
-        onPressed: (){},
-        child: const Text(
-          "Book Ride!",
+      appBar: AppBar(
+        toolbarHeight: _deviceHeight * 0.15,
+        title: const Text(
+          'Taskly', 
           style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-          ),
+            fontSize: 30, 
+            fontWeight: FontWeight.bold
+          )
         ),
       ),
+      body: _tasksView(),
+      floatingActionButton: _addTaskButton(),
+    );
+  }
+
+  Widget _tasksView() {
+    return FutureBuilder(
+      future: Hive.openBox('tasks'),
+      builder: (BuildContext _context, AsyncSnapshot _snapshot) {
+        if (_snapshot.connectionState == ConnectionState.done) {
+          return _tasksList();
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _tasksList() {
+    return ListView(
+      children: [
+        ListTile(
+          title: const Text(
+            'Do Laundry', 
+            style: TextStyle(
+              decoration: TextDecoration.lineThrough
+            )),
+            subtitle: Text(DateTime.now().toString()),
+            trailing: IconButton(
+              icon: const Icon(
+                Icons.check_box_outlined, 
+                color: Colors.red
+              ),
+              onPressed: () {},
+            ),
+          ),    
+      ]
+      
+    ); 
+  }
+
+  Widget _addTaskButton() {
+    return FloatingActionButton(
+      onPressed: _displayTaskPopup,
+      backgroundColor: Colors.red,
+      child: const Icon(Icons.add, color: Colors.white),
+    );
+  }
+
+  void _displayTaskPopup() {
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add a new task'),
+          content: TextField(
+            onSubmitted: (_value) {},
+            onChanged: (_value) {
+              setState(() {
+                _newTaskContent = _value;
+              });
+            },
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Task Content',
+              hintText: 'E.g. Do the laundry'
+            ),
+          ),
+        );
+      }
     );
   }
 }
