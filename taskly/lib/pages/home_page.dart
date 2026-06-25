@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../models/task.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +15,7 @@ class _HomePageState extends State<HomePage> {
   late double _deviceHeight, _deviceWidth;
   String? _newTaskContent;
 
+  Box? _box;
   _HomePageState();
 
   @override
@@ -41,6 +43,7 @@ class _HomePageState extends State<HomePage> {
       future: Hive.openBox('tasks'),
       builder: (BuildContext _context, AsyncSnapshot _snapshot) {
         if (_snapshot.connectionState == ConnectionState.done) {
+          _box = _snapshot.data;
           return _tasksList();
         } else {
           return const Center(
@@ -52,26 +55,39 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _tasksList() {
-    return ListView(
-      children: [
-        ListTile(
-          title: const Text(
-            'Do Laundry', 
+    List tasks = _box!.values.toList();
+    return ListView.builder(
+      itemCount: tasks.length,
+      itemBuilder: (BuildContext _context, int _index) {
+        var task = Task.fromMap(tasks[_index]);
+        return ListTile(
+          title: Text(
+            task.content,
             style: TextStyle(
-              decoration: TextDecoration.lineThrough
+              decoration: task.done ? TextDecoration.lineThrough : null,
             )),
-            subtitle: Text(DateTime.now().toString()),
+            subtitle: Text(task.timestamp.toString()),
             trailing: IconButton(
-              icon: const Icon(
-                Icons.check_box_outlined, 
+              icon: Icon(
+                task.done ? Icons.check_box : Icons.check_box_outline_blank,
                 color: Colors.red
               ),
               onPressed: () {},
             ),
-          ),    
-      ]
-      
-    ); 
+            onTap: () {
+              setState(() {
+                task.done = !task.done;
+                _box!.putAt(_index, task.toMap());
+              });
+            },
+            onLongPress: () {
+              setState(() {
+                _box!.deleteAt(_index);
+              });
+            },
+          ); 
+      }
+    );
   }
 
   Widget _addTaskButton() {
@@ -89,17 +105,30 @@ class _HomePageState extends State<HomePage> {
         return AlertDialog(
           title: const Text('Add a new task'),
           content: TextField(
-            onSubmitted: (_value) {},
-            onChanged: (_value) {
-              setState(() {
-                _newTaskContent = _value;
-              });
-            },
+            onSubmitted: (_) {
+              if (_newTaskContent != null) {
+                var _task = Task(
+                  content: _newTaskContent!,
+                  timestamp: DateTime.now(),
+                  done: false
+                );
+                _box!.add(_task.toMap());
+                setState(() {
+                  _newTaskContent = null;
+                  Navigator.pop(context);
+                });
+              }
+            }, 
             autofocus: true,
             decoration: const InputDecoration(
               labelText: 'Task Content',
               hintText: 'E.g. Do the laundry'
             ),
+            onChanged: (_value) {
+              setState(() {
+                _newTaskContent = _value;
+              });
+            },
           ),
         );
       }
