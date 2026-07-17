@@ -32,7 +32,9 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               _titleWidget(),
               _loginForm(),
-              _loginButton(),],
+              _loginButton(),
+              _registerPageLink(),
+            ],
           ),),
         ),
       ),
@@ -79,8 +81,10 @@ class _LoginPageState extends State<LoginPage> {
           });
         },
       validator: (_value) {
-        _value!.contains(RegExp(
-          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")) ? null : 'Please enter a valid email';
+        bool _result = _value!.contains(
+          RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        );
+        return _result ? null : 'Please enter a valid email';
       },
     );
   }
@@ -97,15 +101,20 @@ class _LoginPageState extends State<LoginPage> {
             _password = _value;
           });
         },
-      validator: (_value) {
-        _value!.length >= 6 ? null : 'Password must be at least 6 characters';
-      },
+      validator: (_value) => _value!.length > 6 
+        ? null : 'Password must be at least 6 characters long'
     );
+  }
+
+  void _loginUser() {
+    if (_loginFormKey.currentState!.validate()) {
+      _loginFormKey.currentState!.save();
+    }
   }
 
   Widget _loginButton() {
     return MaterialButton(
-      onPressed: () {},
+      onPressed: _loginUser,
       minWidth: _deviceWidth! * 0.70,
       height: _deviceHeight! * 0.06,
       color: Colors.red,
@@ -119,4 +128,21 @@ class _LoginPageState extends State<LoginPage> {
       ), 
     );
   }
+
+  Widget _registerPageLink() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/register');
+      },
+      child: const Text(
+        "Don't have an account? Register here",
+        style: TextStyle(
+          color: Colors.blue,
+          fontSize: 15,
+          fontWeight: FontWeight.w200,
+        ),
+      ),
+    );
+  }
+  
 }
