@@ -79,11 +79,12 @@ class _RegisterPageState extends State<RegisterPage> {
     var _imageProvider = _image != null ? FileImage(_image!) : const NetworkImage('https://i.pravatar.cc/300');
     return GestureDetector(
       onTap: () {
-        FilePicker.platform.pickFiles(type: FileType.image).then((_result) {});
+        FilePicker.pickFiles(type: FileType.image).then((_result) {
           setState(() {
             _image = File(_result!.files.first.path!);
           });
-        },
+        });
+      },
       child : Container(
       height: _deviceHeight! * 0.15,
       width: _deviceWidth! * 0.40,
@@ -150,11 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _registerButton() {
     return MaterialButton(
-      onPressed: () {
-        if (_registerFormKey.currentState!.validate()) {
-          // Handle registration logic here
-        }
-      },
+      onPressed: _registerUser,
       minWidth: _deviceWidth! * 0.5,
       height: _deviceHeight! * 0.05,
       color: Colors.red,
@@ -164,5 +161,11 @@ class _RegisterPageState extends State<RegisterPage> {
         fontWeight: FontWeight.w400
         ),),
     );
+  }
+
+  void _registerUser() {
+    if (_registerFormKey.currentState!.validate() && _image != null) {
+      _registerFormKey.currentState!.save();
+    }
   }
 }
